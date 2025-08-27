@@ -302,6 +302,33 @@ const assignResearcherPropertyService = async (
   return populatedProperty;
 };
 
+const unassignResearcherPropertyService = async (
+  propertyId: string,
+  researcherId: string
+) => {
+  const property = await AssignResearcherProperty.findOne({
+    property: toMongoId(propertyId),
+    'researchers.researcher': toMongoId(researcherId),
+  });
+
+  if (!property) {
+    throw new ApiError(404, `Researcher is not assigned to this property!`);
+  }
+
+  const updatedProperty = await AssignResearcherProperty.findOneAndUpdate(
+    { property: toMongoId(propertyId) },
+    { $pull: { researchers: { researcher: toMongoId(researcherId) } } },
+    { new: true }
+  ).populate('researchers.researcher');
+
+  if (updatedProperty && !updatedProperty.researchers.length) {
+    await AssignResearcherProperty.findByIdAndDelete(updatedProperty._id);
+    return null;
+  }
+
+  return updatedProperty;
+};
+
 const deletePropertyService = async (
   propertyId: mongoose.Types.ObjectId | string
 ) => {
@@ -1128,6 +1155,7 @@ export {
   findOrUpdateProperty,
   deletePropertyFileService,
   assignResearcherPropertyService,
+  unassignResearcherPropertyService,
   deletePropertyService,
   getPropertyService,
   getPaginatedAssignedResearcherProperties,
