@@ -7,6 +7,7 @@ import {
   addPropertyValidation,
   assignedResearchersToPropertyValidation,
   assignResearcherPropertyValidation,
+  unassignResearcherPropertyValidation,
   deletePropertyValidation,
   propertyFilesValidation,
   researcherSubmittedReportsValidation,
@@ -16,6 +17,7 @@ import {
   addProperty,
   assignedResearchersToProperty,
   assignResearcherProperty,
+  unassignResearcherProperty,
   deleteProperty,
   getProperty,
   paginatedAssignedResearcherProperties,
@@ -127,6 +129,13 @@ router
     authMiddleware,
     roleCheck([ROLES.ADMIN]),
     assignResearcherProperty
+  )
+  .delete(
+    unassignResearcherPropertyValidation,
+    validateRequest,
+    authMiddleware,
+    roleCheck([ROLES.ADMIN]),
+    unassignResearcherProperty
   );
 
 router
