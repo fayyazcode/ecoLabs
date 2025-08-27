@@ -307,8 +307,10 @@ const unassignResearcherPropertyService = async (
   researcherId: string
 ) => {
   const property = await AssignResearcherProperty.findOne({
-    property: propertyId,
-    'researchers.researcher': researcherId,
+
+    property: toMongoId(propertyId),
+    'researchers.researcher': toMongoId(researcherId),
+
   });
 
   if (!property) {
@@ -316,8 +318,10 @@ const unassignResearcherPropertyService = async (
   }
 
   const updatedProperty = await AssignResearcherProperty.findOneAndUpdate(
-    { property: propertyId },
-    { $pull: { researchers: { researcher: researcherId } } },
+    { property: toMongoId(propertyId) },
+    { $pull: { researchers: { researcher: toMongoId(researcherId) } } },
+
+
     { new: true }
   ).populate('researchers.researcher');
 
