@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import {
   assignResearcherPropertyService,
+  unassignResearcherPropertyService,
   deletePropertyFileService,
   deletePropertyService,
   findOrUpdateProperty,
@@ -175,6 +176,27 @@ const assignResearcherProperty = asyncHandler(
       .status(200)
       .json(
         new ApiResponse(200, results, 'Researcher assignment process completed')
+      );
+  }
+);
+
+const unassignResearcherProperty = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { propertyId, researcherId } = req.body;
+
+    const unassigned = await unassignResearcherPropertyService(
+      propertyId,
+      researcherId
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { unassigned },
+          'Researcher unassigned from property successfully'
+        )
       );
   }
 );
@@ -414,6 +436,7 @@ export {
   addProperty,
   removeFiles,
   assignResearcherProperty,
+  unassignResearcherProperty,
   paginatedAssignedResearcherProperties,
   deleteProperty,
   getProperty,
