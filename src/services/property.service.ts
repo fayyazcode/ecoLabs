@@ -309,6 +309,7 @@ const unassignResearcherPropertyService = async (
   const property = await AssignResearcherProperty.findOne({
     property: toMongoId(propertyId),
     'researchers.researcher': toMongoId(researcherId),
+
   });
 
   if (!property) {

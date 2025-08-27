@@ -182,10 +182,12 @@ const assignResearcherProperty = asyncHandler(
 
 const unassignResearcherProperty = asyncHandler(
   async (req: Request, res: Response) => {
+
     const { propertyId, researcherId } = req.query as {
       propertyId: string;
       researcherId: string;
     };
+
 
     const unassigned = await unassignResearcherPropertyService(
       propertyId,
