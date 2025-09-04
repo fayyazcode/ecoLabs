@@ -347,86 +347,6 @@ const deleteLandowner = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// const changeResearchersBidStatus = asyncHandler(
-//   async (req: Request, res: Response) => {
-//     const { id: bidId } = req.params;
-//     const { status, researcherId, assignDate } = req.body;
-
-//     const [findBid] = await Bids.find({
-//       _id: bidId,
-//       researcher: researcherId,
-//     });
-
-//     if (!findBid) {
-//       return res.status(201).json(new ApiError(400, `This user has not bid!`));
-//     }
-
-//     const session = await mongoose.startSession();
-//     session.startTransaction();
-
-//     try {
-//       const updatedBidStatus = await Bids.findByIdAndUpdate(
-//         {
-//           _id: bidId,
-//         },
-//         { status },
-//         {
-//           new: true,
-//         }
-//       ).session(session);
-
-//       if (!updatedBidStatus) {
-//         return res
-//           .status(201)
-//           .json(new ApiError(400, `Something went wrong while updating bid!`));
-//       }
-
-//       if (findBid.property) {
-//         try {
-//           const assignedResearcherProperty =
-//             await assignResearcherPropertyService(
-//               String(findBid.property),
-//               researcherId,
-//               assignDate
-//             );
-
-//           if (!assignedResearcherProperty) {
-//             return res
-//               .status(201)
-//               .json(
-//                 new ApiError(
-//                   400,
-//                   `Something went wrong while assigning researcher property!`
-//                 )
-//               );
-//           }
-//         } catch (error: any) {
-//           if (error.statusCode === 409) {
-//             console.log(
-//               'Researcher already assigned to property:',
-//               error.message
-//             );
-//           } else {
-//             throw error;
-//           }
-//         }
-//       }
-
-//       await session.commitTransaction();
-
-//       res
-//         .status(200)
-//         .json(
-//           new ApiResponse(200, updatedBidStatus, 'Bid updated successfully!')
-//         );
-//     } catch (error: any) {
-//       await session.abortTransaction();
-//       throw new ApiError(500, error.message || 'Failed to update bid!');
-//     } finally {
-//       session.endSession();
-//     }
-//   }
-// );
 const changeResearchersBidStatus = asyncHandler(
   async (req: Request, res: Response) => {
     const { id: bidId } = req.params;
@@ -460,18 +380,6 @@ const changeResearchersBidStatus = asyncHandler(
           .status(201)
           .json(new ApiError(400, `Something went wrong while updating bid!`));
       }
-
-      // Fetch researcher's email if not populated
-      const researcher = await User.findById(researcherId).select('email name'); // assuming this is your researcher model
-      if (!researcher) {
-        throw new ApiError(404, 'Researcher not found!');
-      }
-      // Send email about bid status update
-      sendEmail(
-        researcher.email,
-        'Bid Status Update',
-        `Hello ${researcher.name || 'Researcher'},\n\nYour bid status has been updated to: ${status}.\n\nRegards,\n${PLATFORM_NAME}`
-      ).catch((err) => console.error('Email sending failed:', err));
 
       if (findBid.property) {
         try {

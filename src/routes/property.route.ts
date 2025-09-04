@@ -7,17 +7,16 @@ import {
   addPropertyValidation,
   assignedResearchersToPropertyValidation,
   assignResearcherPropertyValidation,
-  unassignResearcherPropertyValidation,
   deletePropertyValidation,
   propertyFilesValidation,
   researcherSubmittedReportsValidation,
+  unnassignResearcherPropertyValidation,
   updatePropertyNoteValidation,
 } from '../utils/validations/propertyValidations.js';
 import {
   addProperty,
   assignedResearchersToProperty,
   assignResearcherProperty,
-  unassignResearcherProperty,
   deleteProperty,
   getProperty,
   paginatedAssignedResearcherProperties,
@@ -27,6 +26,7 @@ import {
   toggleArchiveProperty,
   transferProperty,
   updateProperty,
+  unnassignResearcherProperty,
   updatePropertyNote,
 } from '../controllers/property.controller.js';
 import propertyBidsRouter from './propertyBids.route.js';
@@ -82,6 +82,36 @@ router
 router.use('/bids', propertyBidsRouter);
 
 router
+  .route('/files/:fileId')
+  .delete(
+    propertyFilesValidation,
+    validateRequest,
+    authMiddleware,
+    roleCheck(ROLES.LANDOWNER),
+    removeFiles
+  );
+
+router
+  .route('/assignResearcherProperty')
+  .post(
+    assignResearcherPropertyValidation,
+    validateRequest,
+    authMiddleware,
+    roleCheck([ROLES.ADMIN]),
+    assignResearcherProperty
+  );
+
+router
+  .route('/unassignResearcherProperty')
+  .patch(
+    unnassignResearcherPropertyValidation,
+    validateRequest,
+    authMiddleware,
+    roleCheck([ROLES.ADMIN]),
+    unnassignResearcherProperty
+  );
+
+router
   .route('/:id/toggle-archive')
   .post(authMiddleware, roleCheck([ROLES.ADMIN]), toggleArchiveProperty);
 
@@ -110,33 +140,6 @@ router
 router
   .route('/:id/transfer')
   .patch(authMiddleware, roleCheck([ROLES.ADMIN]), transferProperty);
-
-router
-  .route('/files/:fileId')
-  .delete(
-    propertyFilesValidation,
-    validateRequest,
-    authMiddleware,
-    roleCheck(ROLES.LANDOWNER),
-    removeFiles
-  );
-
-router
-  .route('/assignResearcherProperty')
-  .post(
-    assignResearcherPropertyValidation,
-    validateRequest,
-    authMiddleware,
-    roleCheck([ROLES.ADMIN]),
-    assignResearcherProperty
-  )
-  .delete(
-    unassignResearcherPropertyValidation,
-    validateRequest,
-    authMiddleware,
-    roleCheck([ROLES.ADMIN]),
-    unassignResearcherProperty
-  );
 
 router
   .route('/:id/note')

@@ -66,16 +66,13 @@ export const assignResearcherPropertyValidation = [
   body('assignDate').notEmpty().withMessage('Assign date is required!'),
 ];
 
-export const unassignResearcherPropertyValidation = [
-
-  query('propertyId')
-
+export const unnassignResearcherPropertyValidation = [
+  body('propertyId')
     .notEmpty()
-    .withMessage('Property Id is required!')
+    .withMessage('PropertyIds is required!')
     .isMongoId()
     .withMessage('Property Id must be a valid MongoDB ObjectId.'),
-  query('researcherId')
-
+  body('researcherId')
     .notEmpty()
     .withMessage('Researcher Id is required!')
     .isMongoId()

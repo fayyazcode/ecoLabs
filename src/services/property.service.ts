@@ -306,28 +306,46 @@ const unassignResearcherPropertyService = async (
   propertyId: string,
   researcherId: string
 ) => {
-  const property = await AssignResearcherProperty.findOne({
+  const existingProperty = await AssignResearcherProperty.findOne({
     property: toMongoId(propertyId),
     'researchers.researcher': toMongoId(researcherId),
+  }).populate('researchers.researcher');
 
-  });
-
-  if (!property) {
+  if (!existingProperty) {
     throw new ApiError(404, `Researcher is not assigned to this property!`);
   }
 
-  const updatedProperty = await AssignResearcherProperty.findOneAndUpdate(
-    { property: toMongoId(propertyId) },
-    { $pull: { researchers: { researcher: toMongoId(researcherId) } } },
-    { new: true }
-  ).populate('researchers.researcher');
+  const property = await AssignResearcherProperty.findOne({
+    property: toMongoId(propertyId),
+  });
 
-  if (updatedProperty && !updatedProperty.researchers.length) {
-    await AssignResearcherProperty.findByIdAndDelete(updatedProperty._id);
-    return null;
+  if (!property) {
+    throw new ApiError(404, 'Property not found!');
   }
 
-  return updatedProperty;
+  if (researcherId) {
+    if (existingProperty.researchers.length === 1) {
+      await AssignResearcherProperty.findOneAndDelete({
+        property: toMongoId(propertyId),
+      });
+
+      return;
+    }
+
+    const updatedProperty = await AssignResearcherProperty.findOneAndUpdate(
+      { property: toMongoId(propertyId) },
+      {
+        $pull: {
+          researchers: {
+            researcher: toMongoId(researcherId),
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    ).populate('researchers.researcher');
+
+    return updatedProperty;
+  }
 };
 
 const deletePropertyService = async (
@@ -1156,7 +1174,6 @@ export {
   findOrUpdateProperty,
   deletePropertyFileService,
   assignResearcherPropertyService,
-  unassignResearcherPropertyService,
   deletePropertyService,
   getPropertyService,
   getPaginatedAssignedResearcherProperties,
@@ -1166,4 +1183,5 @@ export {
   getBidService,
   toggleArchivePropertyService,
   transferPropertyService,
+  unassignResearcherPropertyService,
 };

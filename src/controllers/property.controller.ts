@@ -4,7 +4,6 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import {
   assignResearcherPropertyService,
-  unassignResearcherPropertyService,
   deletePropertyFileService,
   deletePropertyService,
   findOrUpdateProperty,
@@ -16,6 +15,7 @@ import {
   getPropertyService,
   toggleArchivePropertyService,
   transferPropertyService,
+  unassignResearcherPropertyService,
 } from '../services/property.service.js';
 import {
   parseBooleanQueryParam,
@@ -121,7 +121,7 @@ const removeFiles = asyncHandler(async (req: Request, res: Response) => {
 const assignResearcherProperty = asyncHandler(
   async (req: Request, res: Response) => {
     const { propertyIds, researcherId, assignDate } = req.body; // array of property IDs
-    const { roles, _id } = req.user;
+    const { roles } = req.user;
 
     if (!Array.isArray(propertyIds) || propertyIds.length === 0) {
       return res
@@ -135,14 +135,14 @@ const assignResearcherProperty = asyncHandler(
       try {
         if (roles === ROLES.ADMIN) {
           const [findBid] = await Bids.find({
-            researcher: toMongoId(_id),
-            property: propertyId,
+            researcher: toMongoId(researcherId),
+            property: toMongoId(propertyId),
           });
 
           if (!findBid) {
             const createdBid = await Bids.create({
-              property: propertyId,
-              researcher: toMongoId(_id),
+              property: toMongoId(propertyId),
+              researcher: toMongoId(researcherId),
               status: PROPOSAL_STATUS.APPROVED,
               description: 'This is a bid created by admin for researcher',
             });
@@ -180,27 +180,36 @@ const assignResearcherProperty = asyncHandler(
   }
 );
 
-const unassignResearcherProperty = asyncHandler(
+const unnassignResearcherProperty = asyncHandler(
   async (req: Request, res: Response) => {
+    const { propertyId, researcherId } = req.body;
 
-    const { propertyId, researcherId } = req.query as {
-      propertyId: string;
-      researcherId: string;
-    };
+    const unassignedResearcherProperty =
+      await unassignResearcherPropertyService(propertyId, researcherId);
 
+    if (!unassignedResearcherProperty) {
+      return res
+        .status(201)
+        .json(
+          new ApiError(
+            400,
+            `Something went wrong while unassigning researcher property!`
+          )
+        );
+    }
 
-    const unassigned = await unassignResearcherPropertyService(
-      propertyId,
-      researcherId
-    );
+    await Bids.findOneAndDelete({
+      researcher: toMongoId(researcherId),
+      property: toMongoId(propertyId),
+    });
 
     res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          { unassigned },
-          'Researcher unassigned from property successfully'
+          unassignedResearcherProperty,
+          'Researcher Unassigned successfully'
         )
       );
   }
@@ -441,7 +450,6 @@ export {
   addProperty,
   removeFiles,
   assignResearcherProperty,
-  unassignResearcherProperty,
   paginatedAssignedResearcherProperties,
   deleteProperty,
   getProperty,
@@ -453,4 +461,5 @@ export {
   transferProperty,
   updatePropertyNote,
   updateProperty,
+  unnassignResearcherProperty,
 };

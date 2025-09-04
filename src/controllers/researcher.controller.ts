@@ -371,7 +371,7 @@ const placeBidResearch = asyncHandler(async (req: Request, res: Response) => {
     type: file.mimetype,
     originalName: file.originalname,
   }));
-console.log(filePayload,"check files when adding a bid")
+
   const createdBid = await Bids.create({
     property: propertyId,
     researcher: userId,
@@ -440,70 +440,7 @@ const removeBidResearch = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .json(new ApiResponse(200, findBid, 'Bid removed successfully!'));
 });
-// const removeBidResearch = asyncHandler(async (req: Request, res: Response) => {
-//   const { id: bidId } = req.params;
-//   const { propertyId, researcherId } = req.body; // or req.query
 
-//   // helper to validate ObjectId
-//   const isId = (v?: string) => !!v && mongoose.Types.ObjectId.isValid(v);
-
-//   // CASE A: Delete by bidId only
-//   if (isId(bidId) && !propertyId && !researcherId) {
-//     const deleted = await Bids.findByIdAndDelete(bidId);
-//     if (!deleted) {
-//       return res.status(404).json(new ApiResponse(404, null, 'Bid not found.'));
-//     }
-//     return res
-//       .status(200)
-//       .json(new ApiResponse(200, deleted, 'Bid removed successfully.'));
-//   }
-
-//   // CASE B: Delete by pair (propertyId + researcherId)
-//   if (!bidId && isId(propertyId) && isId(researcherId)) {
-//     const deleted = await Bids.findOneAndDelete({
-//       property: propertyId,
-//       researcher: researcherId,
-//     });
-//     if (!deleted) {
-//       return res
-//         .status(404)
-//         .json(new ApiResponse(404, null, 'Bid for this property & researcher not found.'));
-//     }
-//     return res
-//       .status(200)
-//       .json(new ApiResponse(200, deleted, 'Bid removed successfully.'));
-//   }
-
-//   // CASE C (optional but safer): validate bidId belongs to the provided pair, then delete
-//   if (isId(bidId) && isId(propertyId) && isId(researcherId)) {
-//     const deleted = await Bids.findOneAndDelete({
-//       _id: bidId,
-//       property: propertyId,
-//       researcher: researcherId,
-//     });
-//     if (!deleted) {
-//       return res.status(404).json(
-//         new ApiResponse(
-//           404,
-//           null,
-//           'Bid not found for this id with the given property & researcher.'
-//         )
-//       );
-//     }
-//     return res
-//       .status(200)
-//       .json(new ApiResponse(200, deleted, 'Bid removed successfully.'));
-//   }
-
-//   // If we reach here, inputs are invalid or incomplete
-//   return res.status(400).json(
-//     new ApiResponse(
-//       400,
-//       null,
-//       'Provide either a valid bidId, or both propertyId & researcherId. If sending all three, they must match the same bid.'
-//     )
-//   );
-// });
 const addReports = asyncHandler(async (req: Request, res: Response) => {
   const { id: researcherId } = req.user;
   const { property, files, name, description } = req.body;
