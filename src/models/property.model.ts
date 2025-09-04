@@ -9,7 +9,7 @@ import { handleDeleteMiddleware } from '../utils/utils.js';
 interface IPropertyDocument extends IProperty, Document {
   isNew: boolean; // Add Mongoose's isNew property
   archived: boolean;
-  noteUpdatedBy?: mongoose.Schema.Types.ObjectId; // Track who updated the note
+  adminNoteUpdatedBy?: mongoose.Schema.Types.ObjectId; // Track who updated the admin note
 }
 
 const propertySchema = new Schema<IPropertyDocument>(
@@ -61,10 +61,10 @@ const propertySchema = new Schema<IPropertyDocument>(
       type: Boolean,
       default: false,
     },
-    note: {
+    adminNote: {
       type: String,
     },
-    noteUpdatedBy: {
+    adminNoteUpdatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: MODELS.USERS,
     },
@@ -74,41 +74,41 @@ const propertySchema = new Schema<IPropertyDocument>(
   }
 );
 
-// Pre-save middleware to check admin role for note updates
-propertySchema.pre('save', function(next) {
-  // Only check for note updates if this is an update operation (not a new document)
-  if (!this.isNew && this.isModified('note')) {
+// Pre-save middleware to check admin role for adminNote updates
+propertySchema.pre('save', function (next) {
+  // Only check for adminNote updates if this is an update operation (not a new document)
+  if (!this.isNew && this.isModified('adminNote')) {
     // Get the user from the request context
     // This will be set by the controller before calling save()
     const user = (this as any).__user;
-    
+
     if (!user || user.roles !== 'super-admin') {
-      return next(new Error('Only admins can update property notes'));
+      return next(new Error('Only admins can update property admin notes'));
     }
-    
-    // Set the noteUpdatedBy field
-    this.noteUpdatedBy = user._id;
+
+    // Set the adminNoteUpdatedBy field
+    this.adminNoteUpdatedBy = user._id;
   }
-  
+
   next();
 });
 
 // Pre-update middleware for findOneAndUpdate operations
-propertySchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function(next) {
+propertySchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function (next) {
   const update = this.getUpdate();
-  
-  // Check if note is being updated
-  if (update && (update as any).note !== undefined) {
+
+  // Check if adminNote is being updated
+  if (update && (update as any).adminNote !== undefined) {
     const user = (this as any).__user;
-    
+
     if (!user || user.roles !== 'super-admin') {
-      return next(new Error('Only admins can update property notes'));
+      return next(new Error('Only admins can update property admin notes'));
     }
-    
-    // Add noteUpdatedBy to the update
-    (update as any).noteUpdatedBy = user._id;
+
+    // Add adminNoteUpdatedBy to the update
+    (update as any).adminNoteUpdatedBy = user._id;
   }
-  
+
   next();
 });
 

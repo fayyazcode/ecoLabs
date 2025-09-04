@@ -11,7 +11,7 @@ import {
   propertyFilesValidation,
   researcherSubmittedReportsValidation,
   unnassignResearcherPropertyValidation,
-  updatePropertyNoteValidation,
+  updatePropertyAdminNoteValidation,
 } from '../utils/validations/propertyValidations.js';
 import {
   addProperty,
@@ -27,7 +27,7 @@ import {
   transferProperty,
   updateProperty,
   unnassignResearcherProperty,
-  updatePropertyNote,
+  updatePropertyAdminNote,
 } from '../controllers/property.controller.js';
 import propertyBidsRouter from './propertyBids.route.js';
 import upload from '../middlewares/multer.js';
@@ -142,13 +142,13 @@ router
   .patch(authMiddleware, roleCheck([ROLES.ADMIN]), transferProperty);
 
 router
-  .route('/:id/note')
+  .route('/:id/admin-note')
   .patch(
-    updatePropertyNoteValidation,
+    updatePropertyAdminNoteValidation,
     validateRequest,
     authMiddleware,
     roleCheck([ROLES.ADMIN]),
-    updatePropertyNote
+    updatePropertyAdminNote
   );
 
 export default router;

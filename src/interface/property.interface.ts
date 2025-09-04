@@ -5,14 +5,14 @@ import { FilesType } from '../types/index.js';
 
 export interface IProperty {
   propertyName: string;
-  propertyLocation: string; 
+  propertyLocation: string;
   startDate: string;
-  note: string;
+  adminNote: string;
   propertySize: string | undefined;
   landowner: mongoose.Schema.Types.ObjectId;
   assignedResearchers: mongoose.Schema.Types.ObjectId[];
   archived: boolean;
-  noteUpdatedBy?: mongoose.Schema.Types.ObjectId;
+  adminNoteUpdatedBy?: mongoose.Schema.Types.ObjectId;
 }
 
 export interface IReports {
@@ -24,12 +24,14 @@ export interface IReports {
   archived: boolean;
 }
 
-export interface IUpdateLandowner extends Omit<IProperty, 'note' | 'noteUpdatedBy'>, Omit<IUser, 'note' | 'noteUpdatedBy'> {
+export interface IUpdateLandowner
+  extends Omit<IProperty, 'adminNote' | 'adminNoteUpdatedBy'>,
+    Omit<IUser, 'note' | 'noteUpdatedBy'> {
   // Add back the note properties with more specific names to avoid conflicts
   userNote?: string;
-  propertyNote?: string;
+  propertyAdminNote?: string;
   userNoteUpdatedBy?: string;
-  propertyNoteUpdatedBy?: string;
+  propertyAdminNoteUpdatedBy?: string;
 }
 
 export interface IAssignReport extends IReport {}
