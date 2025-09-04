@@ -35,6 +35,7 @@ const addProperty = asyncHandler(async (req: Request, res: Response) => {
     landownerId,
     files,
     startDate,
+    adminNote,
   } = req.body;
 
   const property = await findOrUpdateProperty(
@@ -43,7 +44,8 @@ const addProperty = asyncHandler(async (req: Request, res: Response) => {
     propertySize,
     files,
     landownerId,
-    startDate
+    startDate,
+    adminNote
   );
 
   if (!property) {
@@ -65,6 +67,7 @@ const updateProperty = asyncHandler(async (req: Request, res: Response) => {
     landownerId,
     files,
     startDate,
+    adminNote,
   } = req.body;
 
   const { id } = req.params;
@@ -76,6 +79,7 @@ const updateProperty = asyncHandler(async (req: Request, res: Response) => {
     files,
     landownerId,
     startDate,
+    adminNote,
     id
   );
 
@@ -420,31 +424,33 @@ const getSingleBid = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, foundBid, 'Bid fetched successfully!'));
 });
 
-const updatePropertyNote = asyncHandler(async (req: Request, res: Response) => {
-  const { id: propertyId } = req.params;
-  const { note } = req.body;
-  const { _id: userId } = req.user;
+const updatePropertyAdminNote = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id: propertyId } = req.params;
+    const { adminNote } = req.body;
+    const { _id: userId } = req.user;
 
-  // Find the property
-  const property = await Property.findById(propertyId);
+    // Find the property
+    const property = await Property.findById(propertyId);
 
-  if (!property) {
-    return res.status(404).json(new ApiError(404, 'Property not found!'));
+    if (!property) {
+      return res.status(404).json(new ApiError(404, 'Property not found!'));
+    }
+
+    // Set the user context for the middleware
+    (property as any).__user = req.user;
+
+    // Update the admin note
+    property.adminNote = adminNote;
+    property.adminNoteUpdatedBy = userId;
+
+    await property.save();
+
+    res.status(200).json(
+      new ApiResponse(200, property, 'Property admin note updated successfully')
+    );
   }
-
-  // Set the user context for the middleware
-  (property as any).__user = req.user;
-
-  // Update the note
-  property.note = note;
-  property.noteUpdatedBy = userId;
-
-  await property.save();
-
-  res
-    .status(200)
-    .json(new ApiResponse(200, property, 'Property note updated successfully'));
-});
+);
 
 export {
   addProperty,
@@ -459,7 +465,7 @@ export {
   getSingleBid,
   toggleArchiveProperty,
   transferProperty,
-  updatePropertyNote,
+  updatePropertyAdminNote,
   updateProperty,
   unnassignResearcherProperty,
 };
