@@ -5,12 +5,12 @@ import { IPReport } from './report.interface.js';
 
 export interface IAddUniversityParams
   extends Omit<IUser, 'note' | 'noteUpdatedBy'>,
-    Omit<IProperty, 'adminNote' | 'adminNoteUpdatedBy'> {
+    Omit<IProperty, 'note' | 'noteUpdatedBy'> {
   // Add back the note properties with more specific names to avoid conflicts
   userNote?: string;
-  propertyAdminNote?: string;
+  propertyNote?: string;
   userNoteUpdatedBy?: string;
-  propertyAdminNoteUpdatedBy?: string;
+  propertyNoteUpdatedBy?: string;
 }
 
 export interface IUniversityAggregatePaginationServiceParams
@@ -32,14 +32,14 @@ export interface IUniversityReportBidsAggregatePaginationServiceParams
 }
 
 export interface IUpdateUniversity
-  extends Omit<IProperty, 'adminNote' | 'adminNoteUpdatedBy'>,
+  extends Omit<IProperty, 'note' | 'noteUpdatedBy'>,
     Omit<IPReport, 'note' | 'noteUpdatedBy'>,
     Omit<IUser, 'note' | 'noteUpdatedBy'> {
   // Add back the note properties with more specific names to avoid conflicts
   userNote?: string;
-  propertyAdminNote?: string;
+  propertyNote?: string;
   reportNote?: string;
   userNoteUpdatedBy?: string;
-  propertyAdminNoteUpdatedBy?: string;
+  propertyNoteUpdatedBy?: string;
   reportNoteUpdatedBy?: string;
 }

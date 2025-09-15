@@ -9,7 +9,7 @@ import { handleDeleteMiddleware } from '../utils/utils.js';
 interface IPropertyDocument extends IProperty, Document {
   isNew: boolean; // Add Mongoose's isNew property
   archived: boolean;
-  adminNoteUpdatedBy?: mongoose.Schema.Types.ObjectId; // Track who updated the admin note
+  noteUpdatedBy?: mongoose.Schema.Types.ObjectId; // Track who updated the note
 }
 
 const propertySchema = new Schema<IPropertyDocument>(
@@ -61,10 +61,10 @@ const propertySchema = new Schema<IPropertyDocument>(
       type: Boolean,
       default: false,
     },
-    adminNote: {
+    note: {
       type: String,
     },
-    adminNoteUpdatedBy: {
+    noteUpdatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: MODELS.USERS,
     },
@@ -74,10 +74,10 @@ const propertySchema = new Schema<IPropertyDocument>(
   }
 );
 
-// Pre-save middleware to check admin role for adminNote updates
+// Pre-save middleware to check admin role for note updates
 propertySchema.pre('save', function (next) {
-  // Only check for adminNote updates if this is an update operation (not a new document)
-  if (!this.isNew && this.isModified('adminNote')) {
+  // Only check for note updates if this is an update operation (not a new document)
+  if (!this.isNew && this.isModified('note')) {
     // Get the user from the request context
     // This will be set by the controller before calling save()
     const user = (this as any).__user;
@@ -86,8 +86,8 @@ propertySchema.pre('save', function (next) {
       return next(new Error('Only admins can update property admin notes'));
     }
 
-    // Set the adminNoteUpdatedBy field
-    this.adminNoteUpdatedBy = user._id;
+    // Set the noteUpdatedBy field
+    this.noteUpdatedBy = user._id;
   }
 
   next();
@@ -97,16 +97,16 @@ propertySchema.pre('save', function (next) {
 propertySchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function (next) {
   const update = this.getUpdate();
 
-  // Check if adminNote is being updated
-  if (update && (update as any).adminNote !== undefined) {
+  // Check if note is being updated
+  if (update && (update as any).note !== undefined) {
     const user = (this as any).__user;
 
     if (!user || user.roles !== 'super-admin') {
       return next(new Error('Only admins can update property admin notes'));
     }
 
-    // Add adminNoteUpdatedBy to the update
-    (update as any).adminNoteUpdatedBy = user._id;
+    // Add noteUpdatedBy to the update
+    (update as any).noteUpdatedBy = user._id;
   }
 
   next();

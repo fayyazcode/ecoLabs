@@ -21,11 +21,11 @@ export const addPropertyValidation = [
     .trim()
     .isLength({ min: 3 })
     .withMessage('Property Size must be at least 3 characters long'),
-  body('adminNote')
+  body('note')
     .optional()
     .trim()
     .isLength({ min: 1, max: 1000 })
-    .withMessage('Admin note must be between 1 and 1000 characters long'),
+    .withMessage('Note must be between 1 and 1000 characters long'),
   body('landownerId')
     .notEmpty()
     .isMongoId()
@@ -148,7 +148,7 @@ export const getSingleBidValidation = [
     .withMessage('Bid Id must be a valid MongoDB ObjectId.'),
 ];
 
-export const updatePropertyAdminNoteValidation = [
+export const updatePropertyNoteValidation = [
   param('id')
     .notEmpty()
     .withMessage('Property Id is required!')
@@ -163,10 +163,10 @@ export const updatePropertyAdminNoteValidation = [
 
       return true;
     }),
-  body('adminNote')
+  body('note')
     .notEmpty()
-    .withMessage('Admin note is required!')
+    .withMessage('Note is required!')
     .trim()
     .isLength({ min: 1, max: 1000 })
-    .withMessage('Admin note must be between 1 and 1000 characters long'),
+    .withMessage('Note must be between 1 and 1000 characters long'),
 ];
