@@ -35,7 +35,7 @@ const addProperty = asyncHandler(async (req: Request, res: Response) => {
     landownerId,
     files,
     startDate,
-    adminNote,
+    note,
   } = req.body;
 
   const property = await findOrUpdateProperty(
@@ -45,7 +45,7 @@ const addProperty = asyncHandler(async (req: Request, res: Response) => {
     files,
     landownerId,
     startDate,
-    adminNote
+    note
   );
 
   if (!property) {
@@ -67,7 +67,7 @@ const updateProperty = asyncHandler(async (req: Request, res: Response) => {
     landownerId,
     files,
     startDate,
-    adminNote,
+    note,
   } = req.body;
 
   const { id } = req.params;
@@ -79,7 +79,7 @@ const updateProperty = asyncHandler(async (req: Request, res: Response) => {
     files,
     landownerId,
     startDate,
-    adminNote,
+    note,
     id
   );
 
@@ -424,10 +424,10 @@ const getSingleBid = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, foundBid, 'Bid fetched successfully!'));
 });
 
-const updatePropertyAdminNote = asyncHandler(
+const updatePropertyNote = asyncHandler(
   async (req: Request, res: Response) => {
     const { id: propertyId } = req.params;
-    const { adminNote } = req.body;
+    const { note } = req.body;
     const { _id: userId } = req.user;
 
     // Find the property
@@ -440,14 +440,14 @@ const updatePropertyAdminNote = asyncHandler(
     // Set the user context for the middleware
     (property as any).__user = req.user;
 
-    // Update the admin note
-    property.adminNote = adminNote;
-    property.adminNoteUpdatedBy = userId;
+    // Update the note
+    property.note = note;
+    property.noteUpdatedBy = userId;
 
     await property.save();
 
     res.status(200).json(
-      new ApiResponse(200, property, 'Property admin note updated successfully')
+      new ApiResponse(200, property, 'Property note updated successfully')
     );
   }
 );
@@ -465,7 +465,7 @@ export {
   getSingleBid,
   toggleArchiveProperty,
   transferProperty,
-  updatePropertyAdminNote,
+  updatePropertyNote,
   updateProperty,
   unnassignResearcherProperty,
 };

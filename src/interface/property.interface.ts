@@ -7,12 +7,12 @@ export interface IProperty {
   propertyName: string;
   propertyLocation: string;
   startDate: string;
-  adminNote: string;
+  note?: string;
   propertySize: string | undefined;
   landowner: mongoose.Schema.Types.ObjectId;
   assignedResearchers: mongoose.Schema.Types.ObjectId[];
   archived: boolean;
-  adminNoteUpdatedBy?: mongoose.Schema.Types.ObjectId;
+  noteUpdatedBy?: mongoose.Schema.Types.ObjectId;
 }
 
 export interface IReports {
@@ -25,13 +25,13 @@ export interface IReports {
 }
 
 export interface IUpdateLandowner
-  extends Omit<IProperty, 'adminNote' | 'adminNoteUpdatedBy'>,
+  extends Omit<IProperty, 'note' | 'noteUpdatedBy'>,
     Omit<IUser, 'note' | 'noteUpdatedBy'> {
   // Add back the note properties with more specific names to avoid conflicts
   userNote?: string;
-  propertyAdminNote?: string;
+  propertyNote?: string;
   userNoteUpdatedBy?: string;
-  propertyAdminNoteUpdatedBy?: string;
+  propertyNoteUpdatedBy?: string;
 }
 
 export interface IAssignReport extends IReport {}
