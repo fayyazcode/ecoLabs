@@ -166,6 +166,8 @@ const landownerAggregatePaginationService = async ({
               propertyLocation: 1,
               startDate: 1,
               propertySize: 1,
+              note: 1,
+              noteUpdatedBy: 1,
               ...(roles === ROLES.ADMIN
                 ? { adminNote: 1, adminNoteUpdatedBy: 1 }
                 : {}),
@@ -391,6 +393,8 @@ const landownerPropertyAggregatePaginationService = async ({
         archived: 1,
         propertyLocation: 1,
         propertySize: 1,
+        note: 1,
+        noteUpdatedBy: 1,
         ...(roles === ROLES.ADMIN
           ? { adminNote: 1, adminNoteUpdatedBy: 1 }
           : {}),
@@ -672,6 +676,8 @@ const landownerPropertyBidsPaginationService = async ({
               startDate: 1,
               landowner: 1,
               assignedResearchers: 1,
+              note: 1,
+              noteUpdatedBy: 1,
               ...(roles === ROLES.ADMIN
                 ? { adminNote: 1, adminNoteUpdatedBy: 1 }
                 : {}),

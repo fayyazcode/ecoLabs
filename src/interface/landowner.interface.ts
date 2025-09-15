@@ -5,11 +5,16 @@ import { IProperty } from './property.interface.js';
 // Create a combined interface that avoids conflicts by being more specific
 export interface IAddLandownerParams
   extends Omit<IUser, 'note' | 'noteUpdatedBy'>,
-    Omit<IProperty, 'adminNote' | 'adminNoteUpdatedBy'> {
+    Omit<
+      IProperty,
+      'note' | 'noteUpdatedBy' | 'adminNote' | 'adminNoteUpdatedBy'
+    > {
   // Add back the note properties with more specific names to avoid conflicts
   userNote?: string;
+  propertyNote?: string;
   propertyAdminNote?: string;
   userNoteUpdatedBy?: string;
+  propertyNoteUpdatedBy?: string;
   propertyAdminNoteUpdatedBy?: string;
 }
 

@@ -21,6 +21,11 @@ export const addPropertyValidation = [
     .trim()
     .isLength({ min: 3 })
     .withMessage('Property Size must be at least 3 characters long'),
+  body('note')
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Note must be between 1 and 1000 characters long'),
   body('adminNote')
     .optional()
     .trim()
@@ -146,6 +151,29 @@ export const getSingleBidValidation = [
     .withMessage('Bid Id is required!')
     .isMongoId()
     .withMessage('Bid Id must be a valid MongoDB ObjectId.'),
+];
+
+export const updatePropertyNoteValidation = [
+  param('id')
+    .notEmpty()
+    .withMessage('Property Id is required!')
+    .isMongoId()
+    .withMessage('Property Id must be a valid MongoDB ObjectId.')
+    .custom(async (value) => {
+      const property = await Property.findById(value);
+
+      if (!property) {
+        return Promise.reject('Property not found!');
+      }
+
+      return true;
+    }),
+  body('note')
+    .notEmpty()
+    .withMessage('Note is required!')
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Note must be between 1 and 1000 characters long'),
 ];
 
 export const updatePropertyAdminNoteValidation = [

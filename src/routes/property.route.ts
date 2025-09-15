@@ -11,6 +11,7 @@ import {
   propertyFilesValidation,
   researcherSubmittedReportsValidation,
   unnassignResearcherPropertyValidation,
+  updatePropertyNoteValidation,
   updatePropertyAdminNoteValidation,
 } from '../utils/validations/propertyValidations.js';
 import {
@@ -27,6 +28,7 @@ import {
   transferProperty,
   updateProperty,
   unnassignResearcherProperty,
+  updatePropertyNote,
   updatePropertyAdminNote,
 } from '../controllers/property.controller.js';
 import propertyBidsRouter from './propertyBids.route.js';
@@ -149,6 +151,16 @@ router
     authMiddleware,
     roleCheck([ROLES.ADMIN]),
     updatePropertyAdminNote
+  );
+
+router
+  .route('/:id/note')
+  .patch(
+    updatePropertyNoteValidation,
+    validateRequest,
+    authMiddleware,
+    roleCheck([ROLES.LANDOWNER, ROLES.ADMIN]),
+    updatePropertyNote
   );
 
 export default router;

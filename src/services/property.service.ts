@@ -16,6 +16,7 @@ const findOrUpdatePropertySession = async (
   userId: mongoose.Schema.Types.ObjectId | string,
   startDate: string,
   adminNote: string | undefined = undefined,
+  note: string | undefined = undefined,
   session: ClientSession
 ) => {
   let property = await Property.findOne({
@@ -32,6 +33,7 @@ const findOrUpdatePropertySession = async (
       propertySize,
       startDate,
       ...(adminNote ? { adminNote } : {}),
+      ...(note ? { note } : {}),
     });
 
     // Ensure validation is skipped for required fields during updates
@@ -48,6 +50,7 @@ const findOrUpdatePropertySession = async (
           landowner: userId,
           startDate,
           ...(adminNote ? { adminNote } : {}),
+          ...(note ? { note } : {}),
         },
       ],
       { session }
@@ -91,6 +94,7 @@ const findOrUpdateProperty = async (
   userId: mongoose.Schema.Types.ObjectId | string,
   startDate: string,
   adminNote: string | undefined = undefined,
+  note: string | undefined = undefined,
   propertyId: mongoose.Schema.Types.ObjectId | string | null = null
 ) => {
   const findCondition = propertyId
@@ -123,6 +127,7 @@ const findOrUpdateProperty = async (
         propertySize,
         startDate,
         ...(adminNote ? { adminNote } : {}),
+        ...(note ? { note } : {}),
       });
 
       await property.save({ session, validateModifiedOnly: true });
@@ -137,6 +142,7 @@ const findOrUpdateProperty = async (
           landowner: userId,
           startDate,
           ...(adminNote ? { adminNote } : {}),
+          ...(note ? { note } : {}),
         },
       ],
       { session }
@@ -468,6 +474,8 @@ const getPropertyService = async (propertyId: string, roles?: string) => {
         propertySize: 1,
         landowner: 1,
         startDate: 1,
+        note: 1,
+        noteUpdatedBy: 1,
         ...(roles === ROLES.ADMIN
           ? { adminNote: 1, adminNoteUpdatedBy: 1 }
           : {}),
@@ -630,7 +638,7 @@ const getPaginatedAssignedResearcherProperties = async (
                     email: 1,
                     phone: 1,
                     ...(roles === ROLES.ADMIN
-                      ? { adminNote: 1, adminNoteUpdatedBy: 1 }
+                    ? { note: 1, noteUpdatedBy: 1 }
                       : {}),
                   },
                 },
@@ -650,6 +658,8 @@ const getPaginatedAssignedResearcherProperties = async (
               propertyLocation: 1,
               propertySize: 1,
               startDate: 1,
+              note: 1,
+              noteUpdatedBy: 1,
               ...(roles === ROLES.ADMIN
                 ? { adminNote: 1, adminNoteUpdatedBy: 1 }
                 : {}),
@@ -786,6 +796,8 @@ const getPaginatedPropertiesAssignedToResearcher = async (
               propertyLocation: 1,
               propertySize: 1,
               startDate: 1,
+              note: 1,
+              noteUpdatedBy: 1,
               ...(roles === ROLES.ADMIN
                 ? { adminNote: 1, adminNoteUpdatedBy: 1 }
                 : {}),
@@ -842,6 +854,8 @@ const getPaginatedPropertiesAssignedToResearcher = async (
                 propertyLocation: '$property.propertyLocation',
                 propertySize: '$property.propertySize',
                 startDate: '$property.startDate',
+                note: '$property.note',
+                noteUpdatedBy: '$property.noteUpdatedBy',
                 ...(roles === ROLES.ADMIN
                   ? {
                       adminNote: '$property.adminNote',
@@ -923,6 +937,8 @@ const getPaginatedResearcherReportsOnProperty = async (
               propertySize: 1,
               startDate: 1,
               landowner: 1,
+              note: 1,
+              noteUpdatedBy: 1,
               ...(roles === ROLES.ADMIN
                 ? { adminNote: 1, adminNoteUpdatedBy: 1 }
                 : {}),
@@ -1003,6 +1019,8 @@ const getPaginatedResearcherReportsOnProperty = async (
         propertySize: '$property.propertySize',
         landowner: '$property.landowner',
         startDate: '$property.startDate',
+        note: '$property.note',
+        noteUpdatedBy: '$property.noteUpdatedBy',
         ...(roles === ROLES.ADMIN
           ? {
               adminNote: '$property.adminNote',
@@ -1121,6 +1139,8 @@ const getAllPaginatedPropertiesService = async (
         propertySize: 1,
         landowner: 1,
         startDate: 1,
+        note: 1,
+        noteUpdatedBy: 1,
         ...(roles === ROLES.ADMIN
           ? { adminNote: 1, adminNoteUpdatedBy: 1 }
           : {}),
