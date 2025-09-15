@@ -26,6 +26,11 @@ export const addPropertyValidation = [
     .trim()
     .isLength({ min: 1, max: 1000 })
     .withMessage('Note must be between 1 and 1000 characters long'),
+  body('adminNote')
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Admin note must be between 1 and 1000 characters long'),
   body('landownerId')
     .notEmpty()
     .isMongoId()
@@ -169,4 +174,27 @@ export const updatePropertyNoteValidation = [
     .trim()
     .isLength({ min: 1, max: 1000 })
     .withMessage('Note must be between 1 and 1000 characters long'),
+];
+
+export const updatePropertyAdminNoteValidation = [
+  param('id')
+    .notEmpty()
+    .withMessage('Property Id is required!')
+    .isMongoId()
+    .withMessage('Property Id must be a valid MongoDB ObjectId.')
+    .custom(async (value) => {
+      const property = await Property.findById(value);
+
+      if (!property) {
+        return Promise.reject('Property not found!');
+      }
+
+      return true;
+    }),
+  body('adminNote')
+    .notEmpty()
+    .withMessage('Admin note is required!')
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Admin note must be between 1 and 1000 characters long'),
 ];

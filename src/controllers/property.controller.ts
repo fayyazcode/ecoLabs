@@ -35,6 +35,7 @@ const addProperty = asyncHandler(async (req: Request, res: Response) => {
     landownerId,
     files,
     startDate,
+    adminNote,
     note,
   } = req.body;
 
@@ -45,6 +46,7 @@ const addProperty = asyncHandler(async (req: Request, res: Response) => {
     files,
     landownerId,
     startDate,
+    adminNote,
     note
   );
 
@@ -67,6 +69,7 @@ const updateProperty = asyncHandler(async (req: Request, res: Response) => {
     landownerId,
     files,
     startDate,
+    adminNote,
     note,
   } = req.body;
 
@@ -79,6 +82,7 @@ const updateProperty = asyncHandler(async (req: Request, res: Response) => {
     files,
     landownerId,
     startDate,
+    adminNote,
     note,
     id
   );
@@ -452,6 +456,31 @@ const updatePropertyNote = asyncHandler(
   }
 );
 
+const updatePropertyAdminNote = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id: propertyId } = req.params;
+    const { adminNote } = req.body;
+    const { _id: userId } = req.user;
+
+    const property = await Property.findById(propertyId);
+
+    if (!property) {
+      return res.status(404).json(new ApiError(404, 'Property not found!'));
+    }
+
+    (property as any).__user = req.user;
+
+    property.adminNote = adminNote;
+    property.adminNoteUpdatedBy = userId;
+
+    await property.save();
+
+    res.status(200).json(
+      new ApiResponse(200, property, 'Property admin note updated successfully')
+    );
+  }
+);
+
 export {
   addProperty,
   removeFiles,
@@ -466,6 +495,7 @@ export {
   toggleArchiveProperty,
   transferProperty,
   updatePropertyNote,
+  updatePropertyAdminNote,
   updateProperty,
   unnassignResearcherProperty,
 };

@@ -68,26 +68,34 @@ const propertySchema = new Schema<IPropertyDocument>(
       type: mongoose.Schema.Types.ObjectId,
       ref: MODELS.USERS,
     },
+    adminNote: {
+      type: String,
+    },
+    adminNoteUpdatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: MODELS.USERS,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Pre-save middleware to check admin role for note updates
+// Pre-save middleware to handle note updates
 propertySchema.pre('save', function (next) {
-  // Only check for note updates if this is an update operation (not a new document)
-  if (!this.isNew && this.isModified('note')) {
-    // Get the user from the request context
-    // This will be set by the controller before calling save()
+  if (!this.isNew) {
     const user = (this as any).__user;
 
-    if (!user || user.roles !== 'super-admin') {
-      return next(new Error('Only admins can update property admin notes'));
+    if (this.isModified('adminNote')) {
+      if (!user || user.roles !== 'super-admin') {
+        return next(new Error('Only admins can update property admin notes'));
+      }
+      this.adminNoteUpdatedBy = user._id;
     }
 
-    // Set the noteUpdatedBy field
-    this.noteUpdatedBy = user._id;
+    if (this.isModified('note') && user) {
+      this.noteUpdatedBy = user._id;
+    }
   }
 
   next();
@@ -96,17 +104,19 @@ propertySchema.pre('save', function (next) {
 // Pre-update middleware for findOneAndUpdate operations
 propertySchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function (next) {
   const update = this.getUpdate();
+  const user = (this as any).__user;
 
-  // Check if note is being updated
-  if (update && (update as any).note !== undefined) {
-    const user = (this as any).__user;
-
-    if (!user || user.roles !== 'super-admin') {
-      return next(new Error('Only admins can update property admin notes'));
+  if (update) {
+    if ((update as any).adminNote !== undefined) {
+      if (!user || user.roles !== 'super-admin') {
+        return next(new Error('Only admins can update property admin notes'));
+      }
+      (update as any).adminNoteUpdatedBy = user._id;
     }
 
-    // Add noteUpdatedBy to the update
-    (update as any).noteUpdatedBy = user._id;
+    if ((update as any).note !== undefined && user) {
+      (update as any).noteUpdatedBy = user._id;
+    }
   }
 
   next();
