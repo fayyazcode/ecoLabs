@@ -354,15 +354,24 @@ const placeBidResearch = asyncHandler(async (req: Request, res: Response) => {
       .json(new ApiResponse(400, null, `Property does not exist!`));
   }
 
-  const [findBid] = await Bids.find({
+  const existingActiveBid = await Bids.findOne({
     researcher: userId,
     property: propertyId,
-  });
+    status: { $ne: PROPOSAL_STATUS.APPROVED },
+  })
+    .sort({ createdAt: -1 })
+    .lean();
 
-  if (findBid) {
+  if (existingActiveBid) {
     return res
       .status(201)
-      .json(new ApiResponse(400, findBid, `Bid already exists!`));
+      .json(
+        new ApiResponse(
+          400,
+          existingActiveBid,
+          `An active bid already exists for this property!`
+        )
+      );
   }
 
   const filePayload = files.map((file: TUploadedFileType) => ({
