@@ -614,13 +614,20 @@ const getPaginatedAssignedResearcherProperties = async (
     page: number;
     limit: number;
   },
-  roles: string
+  roles: string,
+  sort?: string
 ) => {
   const searchQuery = search
     ? {
         $or: [{ 'property.propertyName': { $regex: search, $options: 'i' } }],
       }
     : {};
+
+  const { field: sortField, order: sortOrder } = parseSortParameter(
+    sort,
+    'property.propertyName',
+    1
+  );
 
   const pipeline = [
     {
@@ -750,6 +757,11 @@ const getPaginatedAssignedResearcherProperties = async (
             else: [],
           },
         },
+      },
+    },
+    {
+      $sort: {
+        [sortField]: sortOrder,
       },
     },
     {
@@ -1077,7 +1089,11 @@ const getAllPaginatedPropertiesService = async (
   const assignedFilter: Record<string, any> = {};
 
   // Parse the sort parameter using the helper function
-  const { field: sortField, order: sortOrder } = parseSortParameter(sort);
+  const { field: sortField, order: sortOrder } = parseSortParameter(
+    sort,
+    'propertyName',
+    1
+  );
 
   const aggregatedProperties = Property.aggregate([
     ...(roles !== ROLES.ADMIN ? [{ $match: { archived: false } }] : []),
