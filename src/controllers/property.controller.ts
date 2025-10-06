@@ -295,7 +295,7 @@ const researcherSubmittedReports = asyncHandler(
 
 const paginatedAssignedResearcherProperties = asyncHandler(
   async (req: Request, res: Response) => {
-    const { page = 1, limit = 10, search = '', researcher } = req.query;
+    const { page = 1, limit = 10, search = '', researcher, sort } = req.query;
     const { _id: researcherId, roles } = req.user;
 
     const options = {
@@ -307,7 +307,8 @@ const paginatedAssignedResearcherProperties = asyncHandler(
       search as string,
       roles === ROLES.RESEARCHER ? researcherId : researcher,
       options,
-      roles
+      roles,
+      sort as string
     );
 
     const renamedResult = transformPaginatedResponse(

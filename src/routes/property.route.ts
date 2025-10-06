@@ -159,7 +159,7 @@ router
     updatePropertyNoteValidation,
     validateRequest,
     authMiddleware,
-    roleCheck([ROLES.LANDOWNER, ROLES.ADMIN]),
+    roleCheck([ROLES.ADMIN]),
     updatePropertyNote
   );
 
