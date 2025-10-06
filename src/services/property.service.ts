@@ -273,7 +273,20 @@ const assignResearcherPropertyService = async (
   }).populate('researchers.researcher');
 
   if (existingProperty) {
-    throw new ApiError(409, `Researcher is already assigned to this property!`);
+    const updatedProperty = await AssignResearcherProperty.findOneAndUpdate(
+      {
+        property: propertyId,
+        'researchers.researcher': researcherId,
+      },
+      {
+        $set: {
+          'researchers.$.assignDate': assignDate,
+        },
+      },
+      { new: true, runValidators: true }
+    ).populate('researchers.researcher');
+
+    return updatedProperty;
   }
 
   const property = await AssignResearcherProperty.findOne({
