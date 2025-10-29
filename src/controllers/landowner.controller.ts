@@ -9,12 +9,13 @@ import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import sendEmail from '../utils/sendMail.js';
-import { PLATFORM_NAME, ROLES } from '../constants.js';
+import { PLATFORM_NAME, PROPOSAL_STATUS, ROLES } from '../constants.js';
 import mongoose from 'mongoose';
 import { updateUserDetails } from '../services/user.service.js';
 import {
   assignResearcherPropertyService,
   findOrUpdatePropertySession,
+  unassignResearcherPropertyService,
 } from '../services/property.service.js';
 import { IUpdateLandowner } from '../interface/property.interface.js';
 import {
@@ -386,23 +387,49 @@ const changeResearchersBidStatus = asyncHandler(
       }
 
       if (findBid.property) {
-        try {
-          const assignedResearcherProperty =
-            await assignResearcherPropertyService(
-              String(findBid.property),
-              researcherId,
-              assignDate
-            );
+        const propertyId = String(findBid.property);
 
-          if (!assignedResearcherProperty) {
-            return res
-              .status(201)
-              .json(
-                new ApiError(
-                  400,
-                  `Something went wrong while assigning researcher property!`
-                )
+        try {
+          if (
+            status === PROPOSAL_STATUS.APPROVED ||
+            status === PROPOSAL_STATUS.INPROGRESS
+          ) {
+            const assignedResearcherProperty =
+              await assignResearcherPropertyService(
+                propertyId,
+                researcherId,
+                assignDate
               );
+
+            if (!assignedResearcherProperty) {
+              return res
+                .status(201)
+                .json(
+                  new ApiError(
+                    400,
+                    `Something went wrong while assigning researcher property!`
+                  )
+                );
+            }
+          } else if (
+            [
+              PROPOSAL_STATUS.REJECTED,
+              PROPOSAL_STATUS.UNASSIGNED,
+              PROPOSAL_STATUS.PENDING,
+            ].includes(status)
+          ) {
+            try {
+              await unassignResearcherPropertyService(propertyId, researcherId);
+            } catch (error: any) {
+              if (error instanceof ApiError && error.statusCode === 404) {
+                console.log(
+                  'Researcher is not currently assigned to property:',
+                  error.message
+                );
+              } else {
+                throw error;
+              }
+            }
           }
         } catch (error: any) {
           if (error.statusCode === 409) {
