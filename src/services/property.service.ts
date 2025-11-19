@@ -27,14 +27,16 @@ const findOrUpdatePropertySession = async (
   let uploadedPropertyFiles = null;
 
   if (property) {
-    property.set({
-      propertyName,
-      propertyLocation,
-      propertySize,
-      startDate,
+    const updateData: Record<string, any> = {
+      ...(propertyName !== undefined ? { propertyName } : {}),
+      ...(propertyLocation !== undefined ? { propertyLocation } : {}),
+      ...(propertySize !== undefined ? { propertySize } : {}),
+      ...(startDate !== undefined ? { startDate } : {}),
       ...(adminNote ? { adminNote } : {}),
       ...(note ? { note } : {}),
-    });
+    };
+
+    property.set(updateData);
 
     // Ensure validation is skipped for required fields during updates
     await property.save({ session, validateModifiedOnly: true });
@@ -121,32 +123,34 @@ const findOrUpdateProperty = async (
 
   try {
     if (property) {
-      property.set({
-        propertyName,
-        propertyLocation,
-        propertySize,
-        startDate,
+      const updateData: Record<string, any> = {
+        ...(propertyName !== undefined ? { propertyName } : {}),
+        ...(propertyLocation !== undefined ? { propertyLocation } : {}),
+        ...(propertySize !== undefined ? { propertySize } : {}),
+        ...(startDate !== undefined ? { startDate } : {}),
         ...(adminNote ? { adminNote } : {}),
         ...(note ? { note } : {}),
-      });
+      };
+
+      property.set(updateData);
 
       await property.save({ session, validateModifiedOnly: true });
       property.isNew = false;
     } else {
       const [createdProperty] = await Property.create(
         [
-        {
-          propertyName,
-          propertyLocation,
-          propertySize,
-          landowner: userId,
-          startDate,
-          ...(adminNote ? { adminNote } : {}),
-          ...(note ? { note } : {}),
-        },
-      ],
-      { session }
-    );
+          {
+            propertyName,
+            propertyLocation,
+            propertySize,
+            landowner: userId,
+            startDate,
+            ...(adminNote ? { adminNote } : {}),
+            ...(note ? { note } : {}),
+          },
+        ],
+        { session }
+      );
       property = createdProperty;
       property.isNew = true; // Flag for response
     }
