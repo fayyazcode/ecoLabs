@@ -509,7 +509,8 @@ const addReports = asyncHandler(async (req: Request, res: Response) => {
 
   // ✅ Send admin email
   await sendEmail(
-    'texasecolabprogram@braungresham.com',
+    // 'texasecolabprogram@braungresham.com',
+    'theoxander3@gmail.com',
     'New Report Uploaded by Researcher',
     `Dear Admin,
 
