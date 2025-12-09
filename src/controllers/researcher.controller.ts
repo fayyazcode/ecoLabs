@@ -452,14 +452,14 @@ const removeBidResearch = asyncHandler(async (req: Request, res: Response) => {
 
 const addReports = asyncHandler(async (req: Request, res: Response) => {
   const { id: researcherId } = req.user;
-  const { property, files, name, description } = req.body;
+  const { property, files = [], name, description } = req.body;
 
   const [researcherPermission] = await Bids.find({
     researcher: researcherId,
     property,
   });
 
-  const filePayload = files.map((file: TUploadedFileType) => ({
+  const filePayload = (files as TUploadedFileType[]).map((file) => ({
     name: file.filename,
     url: file.path,
     type: file.mimetype,
@@ -545,9 +545,9 @@ System Notification`
 
 const updateReport = asyncHandler(async (req: Request, res: Response) => {
   const { id: reportId } = req.params;
-  const { files, name, description } = req.body;
+  const { files = [], name, description } = req.body;
 
-  const filePayload = files.map((file: TUploadedFileType) => ({
+  const filePayload = (files as TUploadedFileType[]).map((file) => ({
     name: file.filename,
     url: file.path,
     type: file.mimetype,
@@ -555,9 +555,11 @@ const updateReport = asyncHandler(async (req: Request, res: Response) => {
   }));
 
   // Dynamically build the update object
-  const updatePayload: any = {
-    $push: { files: filePayload }, // Always push new files
-  };
+  const updatePayload: any = {};
+
+  if (filePayload.length) {
+    updatePayload.$push = { files: { $each: filePayload } };
+  }
 
   // Add `name` to the payload only if it is provided
   if (name !== undefined && name.trim() !== '') {
@@ -567,6 +569,12 @@ const updateReport = asyncHandler(async (req: Request, res: Response) => {
   // Add `description` to the payload only if it is provided
   if (description !== undefined && description.trim() !== '') {
     updatePayload.description = description.trim();
+  }
+
+  if (!Object.keys(updatePayload).length) {
+    return res
+      .status(400)
+      .json(new ApiError(400, 'Nothing to update in the report!'));
   }
 
   const addedPropertyFile = await Reports.findOneAndUpdate(
